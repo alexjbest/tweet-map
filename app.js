@@ -1,73 +1,69 @@
 var app = require('http').createServer(handler)
-  , io = require('socket.io').listen(app)
-  , fs = require('fs')
-  , url = require('url')
-  , path = require('path')
-  , twitter = require('ntwitter');
+, io = require('socket.io').listen(app)
+, fs = require('fs')
+, url = require('url')
+, path = require('path')
+, twitter = require('ntwitter');
 
+var config = require('./config.js');
 
-app.listen(8080);
+app.listen(config.port);
 
 function load_static_file(uri, response) {
-	var filename = path.join(process.cwd(), uri);
-	fs.exists(filename, function(exists) {
-		if(!exists) {
-			response.writeHead(404, {"Content-Type": "text/plain"});
-			response.write("404 Not Found\n");
-			response.end();
-			return;
-		}
-		fs.readFile(filename, "binary", function(err, file) {
-			if(err) {
-				response.writeHead(500, {"Content-Type": "text/plain"});
-				response.write(err + "\n");
-				response.end();
-				return;
-			}
-			response.writeHead(200);
-			response.write(file, "binary");
-			response.end();
-		});
-	});
+    var filename = path.join(process.cwd(), uri);
+    fs.exists(filename, function(exists) {
+        if(!exists) {
+            response.writeHead(404, {"Content-Type": "text/plain"});
+            response.write("404 Not Found\n");
+            response.end();
+            return;
+        }
+        fs.readFile(filename, "binary", function(err, file) {
+            if(err) {
+                response.writeHead(500, {"Content-Type": "text/plain"});
+                response.write(err + "\n");
+                response.end();
+                return;
+            }
+            response.writeHead(200);
+            response.write(file, "binary");
+            response.end();
+        });
+    });
 }
 
 function handler (req, res) {
     var uri = url.parse(req.url).pathname;
     if(uri === "/index.html") {
-    	fs.readFile(__dirname + '/index.html',
-	  function (err, data) {
-	    if (err) {
-	      res.writeHead(500);
-	      return res.end('Error loading index.html');
-	    }
+        fs.readFile(__dirname + '/index.html',
+                function (err, data) {
+                    if (err) {
+                        res.writeHead(500);
+                        return res.end('Error loading index.html');
+                    }
 
-	    res.writeHead(200);
-	    res.end(data);
-	  });
+                    res.writeHead(200);
+                    res.end(data);
+                });
     }
     else {
-    	load_static_file(uri, res);
+        load_static_file(uri, res);
     }
 }
 
-var config = require('./config.js');
-
 var twit = new twitter({
-  consumer_key: config.consumer_key,
-  consumer_secret: config.consumer_secret,
-  access_token_key: config.access_token_key,
-  access_token_secret: config.access_token_secret
+    consumer_key: config.consumer_key,
+    consumer_secret: config.consumer_secret,
+    access_token_key: config.access_token_key,
+    access_token_secret: config.access_token_secret
 });
 
 twit.stream('statuses/sample', { }, function(stream) {
-  stream.on('data', function (data) {
-    //console.log(data['user']['name']);
-    if (data['geo'] != null)
-  {
-	  console.log(data['coordinates']);
-	  io.sockets.emit('tweets', data['coordinates']['coordinates']);
-	  
-
-  }
-  });
+    stream.on('data', function (data) {
+        if (data['geo'] != null)
+        {
+            console.log(data['coordinates']);
+            io.sockets.emit('tweets', data['coordinates']['coordinates']);
+        }
+    });
 });
