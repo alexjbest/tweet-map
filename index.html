@@ -20,6 +20,9 @@
 			var NEAR = 1;
 			var FAR = 4000;
 
+			var rotSpeed = 0.0;
+			var rot = 0.0;
+
 			// some global variables and initialization code
 			// simple basic renderer
 			var renderer = new THREE.WebGLRenderer();
@@ -45,13 +48,19 @@
 				addLights();
 				addEarth();
 				addClouds();
-				var socket = io.connect('http://uwcs.co.uk:8080');
+				var socket = io.connect('http://192.168.0.3:8080');
 				socket.on('tweets', function (data) {
 					console.log(data);
 					addTweet(data);
 				});
+				document.addEventListener( 'mousemove', onDocumentMouseMove, false );				
 				render();
 			});
+
+			function onDocumentMouseMove( event ) {
+				camera.position.y = 2*event.clientY - HEIGHT;
+				rotSpeed = (event.clientX - WIDTH / 2) / (WIDTH * 10);
+			}
 
 			// add the earth
 			function addEarth() {
@@ -83,9 +92,10 @@
 			}
 
 			function render() {
-				var timer = Date.now() * 0.0005;
-				camera.position.x = (Math.cos( timer ) *  1800);
-				camera.position.z = (Math.sin( timer ) *  1800) ;
+				rot += rotSpeed;
+				//var timer = Date.now() * 0.0005;
+				camera.position.x = (Math.cos( rot ) *  1800);
+				camera.position.z = (Math.sin( rot ) *  1800) ;
 				camera.lookAt( scene.position );
 				light.position = camera.position;
 				light.lookAt(scene.position);
