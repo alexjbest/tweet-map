@@ -93,10 +93,11 @@
 
 			function render() {
 				rot += rotSpeed;
-				//var timer = Date.now() * 0.0005;
+				var timer = Date.now() * 0.00005;
 				camera.position.x = (Math.cos( rot ) *  1800);
 				camera.position.z = (Math.sin( rot ) *  1800) ;
 				camera.lookAt( scene.position );
+				meshClouds.rotation.y = timer;
 				light.position = camera.position;
 				light.lookAt(scene.position);
 				renderer.render( scene, camera );
@@ -116,9 +117,9 @@
 
 			function addTweet(pos) {
 				var pointGeo = new THREE.SphereGeometry(4,5,5);
-				var materialPoint = new THREE.MeshBasicMaterial( { color: 0xFFFF00, opacity:0.8 } );
+				var materialPoint = new THREE.MeshBasicMaterial( { color: 0xFFFF00, opacity:0.5 } );
 				var meshPoint = new THREE.Mesh( pointGeo, materialPoint );
-				meshPoint.position = latLongToVector3(pos[1],pos[0],600,2);
+				meshPoint.position = latLongToVector3(pos[1],pos[0],600,0);
 				scene.add( meshPoint );
 			}
 		</script>
