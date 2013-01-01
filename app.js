@@ -11,8 +11,9 @@ app.listen(config.port);
 
 function load_static_file(uri, response) {
     var filename = path.join(process.cwd(), uri);
+    console.log(uri);
     fs.exists(filename, function(exists) {
-        if(!exists) {
+        if(!exists || uri.substring(0,10) == "/config.js") {
             response.writeHead(404, {"Content-Type": "text/plain"});
             response.write("404 Not Found\n");
             response.end();
