@@ -48,15 +48,15 @@ function handler (req, res) {
     else {
     	load_static_file(uri, res);
     }
-
-  
 }
 
+var config = require('./config.js');
+
 var twit = new twitter({
-  consumer_key: 'H2xKLFmn4yrAsTsvcyFg',
-  consumer_secret: 'tRuSeWMK2CbxINeKtIZkKom7JANMQ6oBmnhx8fetM',
-  access_token_key: '144853729-1Djic1F6rNYPgvA83jfQLn4lWCN59smjaIjuucT8',
-  access_token_secret: 'AM6pTLQcgPpAFje1VtTzoIlWIDzmdQRSr4of4OJ8JU'
+  consumer_key: config.consumer_key,
+  consumer_secret: config.consumer_secret,
+  access_token_key: config.access_token_key,
+  access_token_secret: config.access_token_secret
 });
 
 twit.stream('statuses/sample', { }, function(stream) {
