@@ -2,5 +2,7 @@ var config = {consumer_key: '',
 consumer_secret : '',
 access_token_key : '',
 access_token_secret : ''};
+config.host = '127.0.0.1';
+config.port = '8080';
 
 module.exports = config;

@@ -105,7 +105,7 @@
 			}
 
 			function addTweet(pos) {
-				var pointGeo = new THREE.SphereGeometry(5,5,5);
+				var pointGeo = new THREE.SphereGeometry(4,5,5);
 				var materialPoint = new THREE.MeshBasicMaterial( { color: 0xFFFF00, opacity:0.8 } );
 				var meshPoint = new THREE.Mesh( pointGeo, materialPoint );
 				meshPoint.position = latLongToVector3(pos[1],pos[0],600,2);
