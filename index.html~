@@ -1,0 +1,117 @@
+<html>
+	<head>
+		<title>Tweet Map</title>
+		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+		<script type="text/javascript" src="three.js"></script>
+		<script src="/socket.io/socket.io.js"></script>
+	</head>
+	<body style="background-color:#111111;">
+		<div id="globe">
+		</div>
+		<script>
+			// couple of constants
+			var POS_X = 1800;
+			var POS_Y = 500;
+			var POS_Z = 1800;
+			var WIDTH = 1024;
+			var HEIGHT = 800;
+
+			var FOV = 45;
+			var NEAR = 1;
+			var FAR = 4000;
+
+			// some global variables and initialization code
+			// simple basic renderer
+			var renderer = new THREE.WebGLRenderer();
+			renderer.setSize(WIDTH,HEIGHT);
+			renderer.setClearColorHex(0x111111);
+
+			// add it to the target element
+			var mapDiv = document.getElementById("globe");
+			mapDiv.appendChild(renderer.domElement);
+
+			// setup a camera that points to the center
+			var camera = new THREE.PerspectiveCamera(FOV,WIDTH/HEIGHT,NEAR,FAR);
+			camera.position.set(POS_X,POS_Y, POS_Z);
+			camera.lookAt(new THREE.Vector3(0,0,0));
+
+			// create a basic scene and add the camera
+			var scene = new THREE.Scene();
+			scene.add(camera);
+
+			// we wait until the document is loaded before loading the
+			// density data.
+			$(document).ready(function()  {
+				addLights();
+				addEarth();
+				addClouds();
+				var socket = io.connect('http://uwcs.co.uk:8080');
+				socket.on('tweets', function (data) {
+					console.log(data);
+					//$("<li>").html(JSON.stringify(data)).prependTo($("#tweets"));
+					addTweet(data);
+				});
+				render();
+			});
+
+			// add the earth
+			function addEarth() {
+				var spGeo = new THREE.SphereGeometry(600,50,50);
+				var planetTexture = THREE.ImageUtils.loadTexture( "textures/land_ocean_ice_2048.jpg" );
+				var mat2 =  new THREE.MeshPhongMaterial( {
+					map: planetTexture,
+					shininess: 0.2 } );
+				sp = new THREE.Mesh(spGeo,mat2);
+				scene.add(sp);
+			}
+
+			// add a simple light
+			function addLights() {
+				light = new THREE.DirectionalLight(0x333333, 3.5, 500 );
+				scene.add( light );
+				light.position.set(POS_X,POS_Y,POS_Z);
+			}
+
+			// add clouds
+			function addClouds() {
+				var spGeo = new THREE.SphereGeometry(600,50,50);
+				var cloudsTexture = THREE.ImageUtils.loadTexture("textures/earth_clouds_1024.png");
+				var materialClouds = new THREE.MeshPhongMaterial( { color: 0xffffff, map: cloudsTexture, transparent:true, opacity:0.3 } );
+
+				meshClouds = new THREE.Mesh( spGeo, materialClouds );
+				meshClouds.scale.set( 1.015, 1.015, 1.015 );
+				scene.add( meshClouds );
+			}
+
+			function render() {
+				var timer = Date.now() * 0.0005;
+				camera.position.x = (Math.cos( timer ) *  1800);
+				camera.position.z = (Math.sin( timer ) *  1800) ;
+				camera.lookAt( scene.position );
+				light.position = camera.position;
+				light.lookAt(scene.position);
+				renderer.render( scene, camera );
+				requestAnimationFrame( render );
+			}
+
+			function latLongToVector3(lat, lon, radius, height) {
+				var phi = (lat)*Math.PI/180;
+				var theta = (lon-180)*Math.PI/180;
+
+				var x = -(radius+height) * Math.cos(phi) * Math.cos(theta);
+				var y = (radius+height) * Math.sin(phi);
+				var z = (radius+height) * Math.cos(phi) * Math.sin(theta);
+
+				return new THREE.Vector3(x,y,z);
+			}
+
+			function addTweet(pos) {
+				var pointGeo = new THREE.SphereGeometry(5,5,5);
+				var materialPoint = new THREE.MeshBasicMaterial( { color: 0xFFFF00, opacity:0.8 } );
+				var meshPoint = new THREE.Mesh( pointGeo, materialPoint );
+				meshPoint.position = latLongToVector3(pos[1],pos[0],600,2);
+				scene.add( meshPoint );
+			}
+		</script>
+	</body>
+</html>
