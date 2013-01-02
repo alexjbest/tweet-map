@@ -67,4 +67,8 @@ twit.stream('statuses/sample', { }, function(stream) {
             io.sockets.emit('tweets', data['coordinates']['coordinates']);
         }
     });
+    stream.on('disconnect', function (disconnectMessage) {
+	console.log("Disconnected: "+disconnectMessage);
+	stream.start();
+    });
 });
