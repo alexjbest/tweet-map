@@ -22,6 +22,7 @@
 
 			var rotSpeed = 0.0;
 			var rot = 0.0;
+			var ROTSPEEDMAX = 0.005;
 
 			// some global variables and initialization code
 			// simple basic renderer
@@ -48,7 +49,7 @@
 				addLights();
 				addEarth();
 				addClouds();
-				var socket = io.connect('http://192.168.0.3:8080');
+				var socket = io.connect('http://uwcs.co.uk:8080');
 				socket.on('tweets', function (data) {
 					console.log(data);
 					addTweet(data);
@@ -60,6 +61,7 @@
 			function onDocumentMouseMove( event ) {
 				camera.position.y = 2*event.clientY - HEIGHT;
 				rotSpeed = (event.clientX - WIDTH / 2) / (WIDTH * 10);
+				if(rotSpeed > ROTSPEEDMAX) rotSpeed = ROTSPEEDMAX;
 			}
 
 			// add the earth
