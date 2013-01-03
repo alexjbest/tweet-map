@@ -82,13 +82,14 @@ function startStream() {
 
 function getTrends() {
     console.log("===Refreshing tweets===");
-    twit.get('trends/place', {id: '1'}, function(err, reply) {
-	console.log(err);
+    twit.get('/trends/place.json', {id: '1'}, function(err, reply) {
+	console.log('err:'+ err);
+//	console.log(JSON.stringify(reply));
+	for(a in reply)
+		console.log(reply[a]);
 	trends = reply.trends;
     });
-    console.log(trends);
     startStream();
 }
-
 setInterval(getTrends, 5000);
 startStream();
