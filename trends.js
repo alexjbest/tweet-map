@@ -62,7 +62,12 @@ var twit = new twitter({
     access_token_secret: config.access_token_secret
 });
 function startStream() {
-	return twit.stream('statuses/sample', { }, function(stream) {
+	var toTrack = ''
+//	console.log(trends);
+	for (t in trends)
+		toTrack += trends[t]['query'] + ',';
+	console.log('trends: '+toTrack);
+	return twit.stream('statuses/filter', {track: toTrack}, function(stream) {
 	    tStream = stream;
 	    stream.on('data', function (data) {
 	        if (data['geo'] != null)
@@ -70,6 +75,9 @@ function startStream() {
 	            console.log(data['coordinates']);
 	            io.sockets.emit('tweets', data['coordinates']['coordinates']);
 	        }
+	    });
+	    stream.on('error', function(error) {
+		console.log('stream error:'+error);
 	    });
 	    stream.on('disconnect', function (disconnectMessage) {
 		console.log("Disconnected: "+disconnectMessage);
@@ -83,13 +91,13 @@ function startStream() {
 function getTrends() {
     console.log("===Refreshing tweets===");
     twit.get('/trends/place.json', {id: '1'}, function(err, reply) {
-	console.log('err:'+ err);
-//	console.log(JSON.stringify(reply));
-	for(a in reply)
-		console.log(reply[a]);
-	trends = reply.trends;
+	console.log('trends err:'+ err);
+	trends = reply[0]['trends'];
     });
-    startStream();
+  //  console.log(trends);
+ //   for (trend in trends)
+//	console.log(trends[trend]['query']);
+   startStream();
 }
-setInterval(getTrends, 5000);
-startStream();
+getTrends();
+setInterval(getTrends, 60000);
